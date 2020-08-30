@@ -6,7 +6,6 @@ import {
 import { Huffman } from "./huffman.js";
 import { RLE } from "./rle.js";
 
-const numPegs = 12 * (30 + 31); // 24 alternating rows of 30 and 31 cols.
 const colors = [
     "blank",
     "red",
@@ -16,9 +15,93 @@ const colors = [
     "green",
     "yellow",
     "pink",
-    "violet"
 ];
 
+class LitBritePeg extends LitElement {
+  constructor() {
+    super();
+    this.color = "blank";
+  }
+
+  static get properties() {
+    return {
+      color: { type: String },
+      gen: { type: Number }
+    };
+  }
+
+  static colorStyles() {
+    return css`
+      .red {
+        --color: red;
+        background: red;
+        filter: drop-shadow(0 0 0.75rem red);
+      }
+      .blue {
+        --color: blue;
+        background: blue;
+        filter: drop-shadow(0 0 0.75rem blue);
+      }
+      .orange {
+        --color: orange;
+        background: orange;
+        filter: drop-shadow(0 0 0.75rem orange);
+      }
+      .white {
+        --color: while;
+        background: white;
+        filter: drop-shadow(0 0 0.75rem white);
+      }
+      .green {
+        --color: green;
+        background: green;
+        filter: drop-shadow(0 0 0.75rem green);
+      }
+      .yellow {
+        --color: yellow;
+        background: yellow;
+        filter: drop-shadow(0 0 0.75rem yellow);
+      }
+      .pink {
+        --color: violet;
+        background: violet;
+        filter: drop-shadow(0 0 0.75rem violet);
+      }
+     .blank {
+        --color: #333;
+        background: #333;
+      }
+      div {
+        background: var(--color);
+        filter: drop-shadow(0 0 0.75rem var(--color));
+      }
+    `;
+  }
+
+  static get styles() {
+    return css`
+      div {
+        border-radius: 50%;
+        height: 0.21in;
+        width: 0.21in;
+        margin: 0.02in;
+        color: black;
+        text-align: center;
+        font-size: 0.15in;
+      }
+      ${LitBritePeg.colorStyles()}
+    `;
+  }
+
+  render() {
+    return html`<div class=${this.color}><slot></slot></div>`;
+  }
+}
+
+customElements.define("lit-brite-peg", LitBritePeg);
+
+
+const numPegs = 12 * (30 + 31); // 24 alternating rows of 30 and 31 cols.
 class LitBrite extends LitElement {
     static get properties() {
         return {
@@ -49,11 +132,14 @@ class LitBrite extends LitElement {
         });
         let h = Huffman.encode(ret);
         let r = RLE.encode(ret);
-        console.log('rle len:', r.length, 'huffman len:', h.length);
-        if (r.length < h.length) {
+        // console.log('rle len:', r.length, 'huffman len:', h.length);
+        // There's a problem with the Huffman encoding whenever you set the very first
+        // peg value. Off by ONE!!!! Strikes again.
+        if (true) { // (r.length < h.length) {
             return 'r=' + encodeURIComponent(r);
+        } else {
+          return 'h=' + encodeURIComponent(h);
         }
-        return 'h=' + encodeURIComponent(h);
     }
 
     // Returns an array of pegs, given a query string containing the serialized pegs.
@@ -114,13 +200,26 @@ class LitBrite extends LitElement {
         align-content: flex-start;
         justify-content: space-around;
       }
+      label > lit-brite-peg {
+        display: flex;
+      }
+      input[type="radio"] {
+        appearance: unset;
+      }
+      .color-selection,
       button {
-        width: 3em;
-        height: 3em;
+        width: 0.5in;
+        height: 0.5in;
         border-radius: 50%;
         background: #333;
         border: 0;
         outline: none;
+      }
+      button:hover {
+        filter: drop-shadow(0 0 0.75rem white);
+      }
+      #clear:hover {
+        filter: drop-shadow(0 0 0.75rem red);
       }
       .controls:hover {
         background: #666;
@@ -137,6 +236,16 @@ class LitBrite extends LitElement {
       lit-brite-peg:nth-child(61n-31) {
         margin-right: 0.25in;
       }
+     ${LitBritePeg.colorStyles()}
+     .color-selection {
+        text-align: center;
+        filter: brightness(0.5);
+        color: black;
+        line-height: 0.5in;
+      }
+      input[type="radio"]:checked+.color-selection {
+         filter: drop-shadow(0 0 1rem var(--color)) brightness(1.0);
+      } 
     `;
     }
 
@@ -191,11 +300,11 @@ class LitBrite extends LitElement {
               type="radio"
               ?checked=${i == 0}
             />
-            <lit-brite-peg .color="${color.name}">${color.count}</lit-brite-peg>
+            <div class="color-selection ${color.name}">${color.count}</div>
           </label> `
         )}
-        <button id="save" @click=${this.saveClicked}>🔗</button>
-        <button id="clear" @click=${this.clearClicked}>🗑️</button>
+        <button id="save" title="Save (create a permalink)" @click=${this.saveClicked}>🔗</button>
+        <button id="clear" title="Clear (there is no undo)" @click=${this.clearClicked}>🗑️</button>
       </div>
       <div id="peg-grid">
         ${this.pegs.map((peg, i) => {
@@ -212,72 +321,3 @@ class LitBrite extends LitElement {
 }
 
 customElements.define("lit-brite", LitBrite);
-
-class LitBritePeg extends LitElement {
-  constructor() {
-    super();
-    this.color = "blank";
-  }
-
-  static get properties() {
-    return {
-      color: { type: String },
-      gen: { type: Number }
-    };
-  }
-
-  static get styles() {
-    return css`
-      div {
-        border-radius: 50%;
-        height: 0.21in;
-        width: 0.21in;
-        margin: 0.02in;
-        color: black;
-        text-align: center;
-        font-size: 0.15in;
-      }
-      .red {
-        background: red;
-        filter: drop-shadow(0 0 0.75rem red);
-      }
-      .blue {
-        background: blue;
-        filter: drop-shadow(0 0 0.75rem blue);
-      }
-      .orange {
-        background: orange;
-        filter: drop-shadow(0 0 0.75rem orange);
-      }
-      .white {
-        background: white;
-        filter: drop-shadow(0 0 0.75rem white);
-      }
-      .green {
-        background: green;
-        filter: drop-shadow(0 0 0.75rem green);
-      }
-      .yellow {
-        background: yellow;
-        filter: drop-shadow(0 0 0.75rem yellow);
-      }
-      .pink {
-        background: violet;
-        filter: drop-shadow(0 0 0.75rem violet);
-      }
-      .violet {
-        background: indigo;
-        filter: drop-shadow(0 0 0.75rem indigo);
-      }
-      .blank {
-        background: #333;
-      }
-    `;
-  }
-
-  render() {
-    return html`<div class=${this.color}><slot></slot></div>`;
-  }
-}
-
-customElements.define("lit-brite-peg", LitBritePeg);
