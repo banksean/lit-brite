@@ -1,0 +1,15 @@
+{
+    "name": "lit-brite",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.html",
+    "scripts": {
+        "start": "es-dev-server --app-index index.html --node-resolve --watch --open",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "es-dev-server": "^1.57.4"
+    }
+}
