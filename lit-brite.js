@@ -31,6 +31,7 @@ class LitBritePeg extends LitElement {
   }
 
   static colorStyles() {
+    // TODO: templatize this and build it from the colors array const.
     return css`
       .red {
         --color: red;
@@ -48,7 +49,7 @@ class LitBritePeg extends LitElement {
         filter: drop-shadow(0 0 0.75rem orange);
       }
       .white {
-        --color: while;
+        --color: white;
         background: white;
         filter: drop-shadow(0 0 0.75rem white);
       }
@@ -244,7 +245,7 @@ class LitBrite extends LitElement {
         line-height: 0.5in;
       }
       input[type="radio"]:checked+.color-selection {
-         filter: drop-shadow(0 0 1rem var(--color)) brightness(1.0);
+         filter: drop-shadow(0 0 0.75rem var(--color)) brightness(1.0);
       } 
     `;
     }
